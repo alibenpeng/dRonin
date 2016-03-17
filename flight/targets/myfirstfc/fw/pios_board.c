@@ -65,7 +65,7 @@ static const struct pios_exti_cfg pios_exti_mpu6050_cfg __exti_config = {
 	.vector = PIOS_MPU6050_IRQHandler,
 	.line = EXTI_Line6,
 	.pin = {
-		.gpio = GPIOA,
+		.gpio = GPIOC,
 		.init = {
 			.GPIO_Pin = GPIO_Pin_6,
 			.GPIO_Speed = GPIO_Speed_50MHz,
@@ -266,49 +266,30 @@ void PIOS_Board_Init(void) {
 	HwMyFirstFCDSMxModeGet(&hw_DSMxMode);
 
 	/* UART1 Port */
-/*
 	uint8_t hw_uart1;
 	HwMyFirstFCUart1Get(&hw_uart1);
 
 	PIOS_HAL_ConfigurePort(hw_uart1,             // port type protocol
 			&pios_usart1_cfg,                    // usart_port_cfg
 			&pios_usart_com_driver,              // com_driver
-			&pios_i2c_usart1_adapter_id,         // i2c_id
-			&pios_i2c_usart1_adapter_cfg,        // i2c_cfg
+			NULL,                                // i2c_id
+			NULL,                                // i2c_cfg
 			NULL,                                // ppm_cfg
 			NULL,                                // pwm_cfg
 			PIOS_LED_ALARM,                      // led_id
 			&pios_usart1_dsm_aux_cfg,            // dsm_cfg
 			hw_DSMxMode,                         // dsm_mode
 			NULL);                               // sbus_cfg
-*/
-
-	/* UART2 Port */
-	uint8_t hw_uart2;
-	HwMyFirstFCUart2Get(&hw_uart2);
-
-	PIOS_HAL_ConfigurePort(hw_uart2,             // port type protocol
-			&pios_usart2_cfg,                    // usart_port_cfg
-			&pios_usart_com_driver,              // com_driver
-			NULL,                                // i2c_id
-			NULL,                                // i2c_cfg
-			NULL,                                // ppm_cfg
-			NULL,                                // pwm_cfg
-			PIOS_LED_ALARM,                      // led_id
-			&pios_usart2_dsm_aux_cfg,            // dsm_cfg
-			hw_DSMxMode,                         // dsm_mode
-			&pios_usart2_sbus_aux_cfg);          // sbus_cfg
 
 	/* UART3 Port */
-/*
 	uint8_t hw_uart3;
 	HwMyFirstFCUart3Get(&hw_uart3);
 
 	PIOS_HAL_ConfigurePort(hw_uart3,             // port type protocol
 			&pios_usart3_cfg,                    // usart_port_cfg
 			&pios_usart_com_driver,              // com_driver
-			&pios_i2c_usart3_adapter_id,         // i2c_id
-			&pios_i2c_usart3_adapter_cfg,        // i2c_cfg
+			NULL,                                // i2c_id
+			NULL,                                // i2c_cfg
 			NULL,                                // ppm_cfg
 			NULL,                                // pwm_cfg
 			PIOS_LED_ALARM,                      // led_id
@@ -316,7 +297,6 @@ void PIOS_Board_Init(void) {
 			hw_DSMxMode,                         // dsm_mode
 			NULL);                               // sbus_cfg
 
-*/
 	/* UART4 Port */
 	uint8_t hw_uart4;
 	HwMyFirstFCUart4Get(&hw_uart4);
@@ -356,39 +336,8 @@ void PIOS_Board_Init(void) {
 	switch (hw_rcvrport) {
 	case HWMYFIRSTFC_RCVRPORT_DISABLED:
 		break;
-	
-	case HWMYFIRSTFC_RCVRPORT_PWM:
-		PIOS_HAL_ConfigurePort(HWSHARED_PORTTYPES_PWM,  // port type protocol
-				NULL,                                   // usart_port_cfg
-				NULL,                                   // com_driver
-				NULL,                                   // i2c_id
-				NULL,                                   // i2c_cfg
-				NULL,                                   // ppm_cfg
-				&pios_pwm_cfg,                          // pwm_cfg
-				PIOS_LED_ALARM,                         // led_id
-				NULL,                                   // dsm_cfg
-				0,                                      // dsm_mode
-				NULL);                                  // sbus_cfg
-		break;
-
-	case HWMYFIRSTFC_RCVRPORT_PWMADC:
-		PIOS_HAL_ConfigurePort(HWSHARED_PORTTYPES_PWM,  // port type protocol
-				NULL,                                   // usart_port_cfg
-				NULL,                                   // com_driver
-				NULL,                                   // i2c_id
-				NULL,                                   // i2c_cfg
-				NULL,                                   // ppm_cfg
-				&pios_pwm_with_adc_cfg,                 // pwm_cfg
-				PIOS_LED_ALARM,                         // led_id
-				NULL,                                   // dsm_cfg
-				0,                                      // dsm_mode
-				NULL);                                  // sbus_cfg
-		break;
 
 	case HWMYFIRSTFC_RCVRPORT_PPM:
-	case HWMYFIRSTFC_RCVRPORT_PPMADC:
-	case HWMYFIRSTFC_RCVRPORT_PPMOUTPUTS:
-	case HWMYFIRSTFC_RCVRPORT_PPMOUTPUTSADC:
 		PIOS_HAL_ConfigurePort(HWSHARED_PORTTYPES_PPM,  // port type protocol
 				NULL,                                   // usart_port_cfg
 				NULL,                                   // com_driver
@@ -402,57 +351,6 @@ void PIOS_Board_Init(void) {
 				NULL);                                  // sbus_cfg
 		break;
 
-	case HWMYFIRSTFC_RCVRPORT_PPMPWM:
-		PIOS_HAL_ConfigurePort(HWSHARED_PORTTYPES_PPM,  // port type protocol
-				NULL,                                   // usart_port_cfg
-				NULL,                                   // com_driver
-				NULL,                                   // i2c_id
-				NULL,                                   // i2c_cfg
-				&pios_ppm_cfg,                          // ppm_cfg
-				NULL,                                   // pwm_cfg
-				PIOS_LED_ALARM,                         // led_id
-				NULL,                                   // dsm_cfg
-				0,                                      // dsm_mode
-				NULL);                                  // sbus_cfg
-
-		PIOS_HAL_ConfigurePort(HWSHARED_PORTTYPES_PWM,  // port type protocol
-				NULL,                                   // usart_port_cfg
-				NULL,                                   // com_driver
-				NULL,                                   // i2c_id
-				NULL,                                   // i2c_cfg
-				NULL,                                   // ppm_cfg
-				&pios_pwm_with_ppm_cfg,                 // pwm_cfg
-				PIOS_LED_ALARM,                         // led_id
-				NULL,                                   // dsm_cfg
-				0,                                      // dsm_mode
-				NULL);                                  // sbus_cfg
-		break;
-
-	case HWMYFIRSTFC_RCVRPORT_PPMPWMADC:
-		PIOS_HAL_ConfigurePort(HWSHARED_PORTTYPES_PPM,  // port type protocol
-				NULL,                                   // usart_port_cfg
-				NULL,                                   // com_driver
-				NULL,                                   // i2c_id
-				NULL,                                   // i2c_cfg
-				&pios_ppm_cfg,                          // ppm_cfg
-				NULL,                                   // pwm_cfg
-				PIOS_LED_ALARM,                         // led_id
-				NULL,                                   // dsm_cfg
-				0,                                      // dsm_mode
-				NULL);                                  // sbus_cfg
-
-		PIOS_HAL_ConfigurePort(HWSHARED_PORTTYPES_PWM,  // port type protocol
-				NULL,                                   // usart_port_cfg
-				NULL,                                   // com_driver
-				NULL,                                   // i2c_id
-				NULL,                                   // i2c_cfg
-				NULL,                                   // ppm_cfg
-				&pios_pwm_with_ppm_with_adc_cfg,        // pwm_cfg
-				PIOS_LED_ALARM,                         // led_id
-				NULL,                                   // dsm_cfg
-				0,                                      // dsm_mode
-				NULL);                                  // sbus_cfg
-		break;
 	}
 
 #if defined(PIOS_INCLUDE_GCSRCVR)
@@ -469,27 +367,10 @@ void PIOS_Board_Init(void) {
 #ifndef PIOS_DEBUG_ENABLE_DEBUG_PINS
 	switch (hw_rcvrport) {
 		case HWMYFIRSTFC_RCVRPORT_DISABLED:
-		case HWMYFIRSTFC_RCVRPORT_PWM:
-		case HWMYFIRSTFC_RCVRPORT_PWMADC:
 		case HWMYFIRSTFC_RCVRPORT_PPM:
-		case HWMYFIRSTFC_RCVRPORT_PPMADC:
-		case HWMYFIRSTFC_RCVRPORT_PPMPWM:
-		case HWMYFIRSTFC_RCVRPORT_PPMPWMADC:
 			/* Set up the servo outputs */
 #ifdef PIOS_INCLUDE_SERVO
 			PIOS_Servo_Init(&pios_servo_cfg);
-#endif
-			break;
-		case HWMYFIRSTFC_RCVRPORT_PPMOUTPUTS:
-		case HWMYFIRSTFC_RCVRPORT_OUTPUTS:
-#ifdef PIOS_INCLUDE_SERVO
-			PIOS_Servo_Init(&pios_servo_with_rcvr_cfg);
-#endif
-			break;
-		case HWMYFIRSTFC_RCVRPORT_PPMOUTPUTSADC:
-		case HWMYFIRSTFC_RCVRPORT_OUTPUTSADC:
-#ifdef PIOS_INCLUDE_SERVO
-			PIOS_Servo_Init(&pios_servo_with_rcvr_with_adc_cfg);
 #endif
 			break;
 	}
@@ -563,15 +444,9 @@ void PIOS_Board_Init(void) {
 #endif
 
 #if defined(PIOS_INCLUDE_ADC)
-	if (hw_rcvrport == HWMYFIRSTFC_RCVRPORT_PWMADC ||
-			hw_rcvrport == HWMYFIRSTFC_RCVRPORT_PPMADC ||
-			hw_rcvrport == HWMYFIRSTFC_RCVRPORT_PPMPWMADC ||
-			hw_rcvrport == HWMYFIRSTFC_RCVRPORT_OUTPUTSADC ||
-			hw_rcvrport == HWMYFIRSTFC_RCVRPORT_PPMOUTPUTSADC) {
-		uint32_t internal_adc_id;
-		PIOS_INTERNAL_ADC_Init(&internal_adc_id, &pios_adc_cfg);
-		PIOS_ADC_Init(&pios_internal_adc_id, &pios_internal_adc_driver, internal_adc_id);
-	}
+  uint32_t internal_adc_id;
+  PIOS_INTERNAL_ADC_Init(&internal_adc_id, &pios_adc_cfg);
+  PIOS_ADC_Init(&pios_internal_adc_id, &pios_internal_adc_driver, internal_adc_id);
 #endif
 
 

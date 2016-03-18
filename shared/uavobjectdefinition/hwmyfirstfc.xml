@@ -6,11 +6,10 @@
 			<options>
 				<option>Disabled</option>
 				<option>PPM</option>
-				<option>PPM+ADC</option>
 			</options>
 		</field>
 
-		<field name="Uart1" units="function" type="enum" elements="1" parent="HwShared.PortTypes" defaultvalue="Disabled">
+		<field name="Uart1" units="function" type="enum" elements="1" parent="HwShared.PortTypes" defaultvalue="MSP">
 			<options>
 				<option>Disabled</option>
 				<option>ComBridge</option>
@@ -35,7 +34,7 @@
 			</options>
 		</field>
 
-		<field name="Uart3" units="function" type="enum" elements="1" parent="HwShared.PortTypes" defaultvalue="Disabled">
+		<field name="Uart3" units="function" type="enum" elements="1" parent="HwShared.PortTypes" defaultvalue="DSM">
 			<options>
 				<option>Disabled</option>
 				<option>ComBridge</option>

@@ -33,16 +33,17 @@
 #include "pios_usbhook.h"	 /* PIOS_USBHOOK_* */
 #include "pios_usb_util.h"	 /* PIOS_USB_UTIL_AsciiToUtf8 */
 
-static const uint8_t usb_product_id[20] = {
+static const uint8_t usb_product_id[22] = {
 	sizeof(usb_product_id),
 	USB_DESC_TYPE_STRING,
-	'm', 0,
-	'y', 0,
-	'f', 0,
-	'i', 0,
-	'r', 0,
-	's', 0,
+	'q', 0,
+	'u', 0,
+	'a', 0,
+	'n', 0,
 	't', 0,
+	'o', 0,
+	'n', 0,
+	' ', 0,
 	'f', 0,
 	'c', 0,
 };
@@ -58,24 +59,30 @@ static const struct usb_string_langid usb_lang_id = {
 	.bLangID = htousbs(USB_LANGID_ENGLISH_US),
 };
 
-static const uint8_t usb_vendor_id[32] = {
+static const uint8_t usb_vendor_id[44] = {
 	sizeof(usb_vendor_id),
 	USB_DESC_TYPE_STRING,
+	'Q', 0,
+	'u', 0,
 	'a', 0,
-	'l', 0,
-	'i', 0,
-	'b', 0,
-	'e', 0,
 	'n', 0,
-	'p', 0,
+	't', 0,
 	'e', 0,
-	'n', 0,
-	'g', 0,
+	'c', 0,
 	' ', 0,
-	'l', 0,
-	'a', 0,
-	'b', 0,
+	'N', 0,
+	'e', 0,
+	't', 0,
+	'w', 0,
+	'o', 0,
+	'r', 0,
+	'k', 0,
 	's', 0,
+	' ', 0,
+	'G', 0,
+	'm', 0,
+	'b', 0,
+	'H', 0,
 };
 
 int32_t PIOS_USB_BOARD_DATA_Init(void)

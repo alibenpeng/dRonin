@@ -37,8 +37,8 @@
 
 #include "pios_usb_defs.h" 	/* struct usb_* */
 
-#define PIOS_USB_BOARD_VENDOR_ID 0x16c1		// alibenpeng labs
-#define PIOS_USB_BOARD_PRODUCT_ID 0x05e1	//myfirstfc rev. 1
+#define PIOS_USB_BOARD_VENDOR_ID 0x0fda		//Quantec Networks GmbH
+#define PIOS_USB_BOARD_PRODUCT_ID 0x0100	//quanton flight control rev. 1
 #define PIOS_USB_BOARD_DEVICE_VER USB_OP_DEVICE_VER(0, USB_OP_BOARD_MODE_BL)
 #define PIOS_USB_BOARD_SN_SUFFIX "+BL"
 

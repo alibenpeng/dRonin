@@ -683,8 +683,8 @@ static const struct pios_tim_clock_cfg tim_12_cfg = {
 	2: TIM3_CH2 (PB5)
 	3: TIM3_CH3 (PB0)
 	4: TIM3_CH4 (PB1)
-	5: TIM12_CH1 (PB14)
-	6: TIM12_CH2 (PB15)
+	--> rcvr ppm: 5: TIM12_CH1 (PB14)
+	--> rcvr rssi pwm: 6: TIM12_CH2 (PB15)
 	7: TIM10_CH1 (PB8)
 	8: TIM11_CH1 (PB9)
  */
@@ -753,6 +753,7 @@ static const struct pios_tim_channel pios_tim_servoport_all_pins[] = {
 			.pin_source = GPIO_PinSource1,
 		},
 	},
+/*
 	{
 		.timer = TIM12,
 		.timer_chan = TIM_Channel_1,
@@ -785,6 +786,7 @@ static const struct pios_tim_channel pios_tim_servoport_all_pins[] = {
 			.pin_source = GPIO_PinSource15,
 		},
 	},
+*/
 	{
 		.timer = TIM10,
 		.timer_chan = TIM_Channel_1,
@@ -846,23 +848,23 @@ const struct pios_servo_cfg pios_servo_cfg = {
 
 /*
  * 	INPUTS
-	1: TIM1_CH3 (PA10)
+	1:  TIM12_CH1 (PB14) --> PPM input
  */
 static const struct pios_tim_channel pios_tim_rcvrport_all_channels[] = {
 	{
-		.timer = TIM11,
+		.timer = TIM12,
 		.timer_chan = TIM_Channel_1,
-		.remap = GPIO_AF_TIM11,
+		.remap = GPIO_AF_TIM12,
 		.pin = {
 			.gpio = GPIOB,
 			.init = {
-				.GPIO_Pin = GPIO_Pin_9,
+				.GPIO_Pin = GPIO_Pin_14,
 				.GPIO_Speed = GPIO_Speed_2MHz,
 				.GPIO_Mode  = GPIO_Mode_AF,
 				.GPIO_OType = GPIO_OType_PP,
 				.GPIO_PuPd  = GPIO_PuPd_UP
 			},
-			.pin_source = GPIO_PinSource9,
+			.pin_source = GPIO_PinSource14,
 		},
 	},
 };
@@ -880,9 +882,9 @@ static const struct pios_ppm_cfg pios_ppm_cfg = {
 		.TIM_ICSelection = TIM_ICSelection_DirectTI,
 		.TIM_ICPrescaler = TIM_ICPSC_DIV1,
 		.TIM_ICFilter = 0x0,
-		.TIM_Channel = TIM_Channel_3,
+		.TIM_Channel = TIM_Channel_1,
 	},
-	/* Use only the first channel for ppm */
+	/* Use the only channel for ppm */
 	.channels = &pios_tim_rcvrport_all_channels[0],
 	.num_channels = 1,
 };
@@ -1021,6 +1023,71 @@ void PIOS_ADC_DMA_irq_handler(void)
 
 #endif /* PIOS_INCLUDE_ADC */
 
+#if defined(PIOS_INCLUDE_FRSKY_RSSI)
+#include "pios_frsky_rssi_priv.h"
+const TIM_TimeBaseInitTypeDef pios_frsky_rssi_time_base ={
+	.TIM_Prescaler = 6,
+	.TIM_ClockDivision = TIM_CKD_DIV1,
+	.TIM_CounterMode = TIM_CounterMode_Up,
+	.TIM_Period = 0xFFFF,
+	.TIM_RepetitionCounter = 0x0000,
+};
+
+
+const struct pios_frsky_rssi_cfg pios_frsky_rssi_cfg = {
+	.clock_cfg = {
+		.timer = TIM8,
+		.time_base_init = &pios_frsky_rssi_time_base,
+	},
+	.channels = {
+		{
+			.timer = TIM8,
+			.timer_chan = TIM_Channel_2,
+			.pin   = {
+				.gpio = GPIOC,
+				.init = {
+					.GPIO_Pin   = GPIO_Pin_7,
+					.GPIO_Speed = GPIO_Speed_100MHz,
+					.GPIO_Mode  = GPIO_Mode_AF,
+					.GPIO_OType = GPIO_OType_PP,
+					.GPIO_PuPd  = GPIO_PuPd_UP
+				},
+				.pin_source = GPIO_PinSource7,
+			},
+			.remap = GPIO_AF_TIM8,
+		},
+		{
+			.timer = TIM8,
+			.timer_chan = TIM_Channel_1,
+			.pin   = {
+				.gpio = GPIOC,
+				.init = {
+					.GPIO_Pin   = GPIO_Pin_7,
+					.GPIO_Speed = GPIO_Speed_100MHz,
+					.GPIO_Mode  = GPIO_Mode_AF,
+					.GPIO_OType = GPIO_OType_PP,
+					.GPIO_PuPd  = GPIO_PuPd_UP
+				},
+				.pin_source = GPIO_PinSource7,
+			},
+			.remap = GPIO_AF_TIM8,
+		},
+	},
+	.ic2 = {
+		.TIM_ICPolarity = TIM_ICPolarity_Falling,
+		.TIM_ICSelection = TIM_ICSelection_IndirectTI,
+		.TIM_ICPrescaler = TIM_ICPSC_DIV1,
+		.TIM_ICFilter = 0x0,
+	},
+	.ic1 = {
+		.TIM_ICPolarity = TIM_ICPolarity_Rising,
+		.TIM_ICSelection = TIM_ICSelection_DirectTI,
+		.TIM_ICPrescaler = TIM_ICPSC_DIV1,
+		.TIM_ICFilter = 0x0,
+	}
+};
+
+#endif /* PIOS_INCLUDE_FRSKY_RSSI */
 /**
  * @}
  * @}

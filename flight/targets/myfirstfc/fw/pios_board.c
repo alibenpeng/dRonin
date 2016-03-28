@@ -104,6 +104,10 @@ static const struct pios_mpu60x0_cfg pios_mpu6050_cfg = {
 };
 #endif /* PIOS_INCLUDE_MPU6050 */
 
+#if defined(PIOS_INCLUDE_FRSKY_RSSI)
+#include "pios_frsky_rssi_priv.h"
+#endif /* PIOS_INCLUDE_FRSKY_RSSI */
+
 /**
  * PIOS_Board_Init()
  * initializes all the core subsystems on this specific hardware
@@ -372,6 +376,9 @@ void PIOS_Board_Init(void) {
 #ifdef PIOS_INCLUDE_SERVO
 			PIOS_Servo_Init(&pios_servo_cfg);
 #endif
+#if defined(PIOS_INCLUDE_FRSKY_RSSI)
+		PIOS_FrSkyRssi_Init(&pios_frsky_rssi_cfg);
+#endif /* PIOS_INCLUDE_FRSKY_RSSI */
 			break;
 	}
 #else
@@ -466,9 +473,9 @@ void PIOS_Board_Init(void) {
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	GPIO_ResetBits(GPIOA, GPIO_Pin_4);
+	GPIO_ResetBits(GPIOA, GPIO_Pin_9);
 
 	/* Make sure we have at least one telemetry link configured or else fail initialization */
 	PIOS_Assert(pios_com_telem_serial_id || pios_com_telem_usb_id);

@@ -200,7 +200,7 @@ extern uintptr_t pios_com_debug_id;
 //-------------------------
 // Receiver PWM input
 //-------------------------
-#define PIOS_PWM_NUM_INPUTS				0
+#define PIOS_PWM_NUM_INPUTS				2
 
 //-------------------------
 // Receiver DSM input

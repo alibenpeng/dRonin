@@ -14,8 +14,8 @@
  *
  * @file       attitude.c
  * @author     The OpenPilot Team, http://www.openpilot.org Copyright (C) 2010.
- * @author     Tau Labs, http://taulabs.org Copyright (C) 2012-2014
- * @author     dRonin, http://dronin.org Copyright (C) 2015
+ * @author     Tau Labs, http://taulabs.org Copyright (C) 2012-2016
+ * @author     dRonin, http://dronin.org Copyright (C) 2015-2016
  * @brief      Full attitude estimation algorithm
  *
  * @see        The GNU Public License (GPL) Version 3
@@ -281,10 +281,12 @@ int32_t AttitudeStart(void)
 	if (GPSVelocityHandle())
 		GPSVelocityConnectQueue(gpsVelQueue);
 
+	// Watchdog must be registered before starting task
+	PIOS_WDG_RegisterFlag(PIOS_WDG_ATTITUDE);
+
 	// Start main task
 	attitudeTaskHandle = PIOS_Thread_Create(AttitudeTask, "Attitude", STACK_SIZE_BYTES, NULL, TASK_PRIORITY);
 	TaskMonitorAdd(TASKINFO_RUNNING_ATTITUDE, attitudeTaskHandle);
-	PIOS_WDG_RegisterFlag(PIOS_WDG_ATTITUDE);
 
 	return 0;
 }
@@ -334,10 +336,9 @@ static void AttitudeTask(void *parameters)
 		           (stateEstimation.AttitudeFilter == STATEESTIMATION_ATTITUDEFILTER_INSINDOOR) ||
 		           (stateEstimation.NavigationFilter == STATEESTIMATION_NAVIGATIONFILTER_INS);
 
-		// INS outdoor mode when used for navigation OR explicit outdoor mode
+		// INS outdoor mode when used for navigation OR explicit outdoor attitude
 		bool outdoor = (stateEstimation.AttitudeFilter == STATEESTIMATION_ATTITUDEFILTER_INSOUTDOOR) ||
-		               ((stateEstimation.AttitudeFilter == STATEESTIMATION_ATTITUDEFILTER_COMPLEMENTARY) &&
-		                (stateEstimation.NavigationFilter == STATEESTIMATION_NAVIGATIONFILTER_INS));
+		                (stateEstimation.NavigationFilter == STATEESTIMATION_NAVIGATIONFILTER_INS);
 
 		// Complementary filter only needed when used for attitude
 		bool complementary = stateEstimation.AttitudeFilter == STATEESTIMATION_ATTITUDEFILTER_COMPLEMENTARY;

@@ -78,16 +78,12 @@ bool AQ32::queryCapabilities(BoardCapabilities capability)
 {
     switch(capability) {
     case BOARD_CAPABILITIES_GYROS:
-        return true;
     case BOARD_CAPABILITIES_ACCELS:
-        return true;
     case BOARD_CAPABILITIES_MAGS:
-        return true;
     case BOARD_CAPABILITIES_BAROS:
+    case BOARD_CAPABILITIES_UPGRADEABLE:
         return true;
-    case BOARD_CAPABILITIES_RADIO:
-        return false;
-    case BOARD_CAPABILITIES_OSD:
+    default:
         return false;
     }
     return false;

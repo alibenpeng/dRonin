@@ -75,16 +75,10 @@ bool Lux::queryCapabilities(BoardCapabilities capability)
 {
     switch(capability) {
     case BOARD_CAPABILITIES_GYROS:
-        return true;
     case BOARD_CAPABILITIES_ACCELS:
+    case BOARD_CAPABILITIES_UPGRADEABLE:
         return true;
-    case BOARD_CAPABILITIES_MAGS:
-        return false;
-    case BOARD_CAPABILITIES_BAROS:
-        return false;
-    case BOARD_CAPABILITIES_RADIO:
-        return false;
-    case BOARD_CAPABILITIES_OSD:
+    default:
         return false;
     }
     return false;
@@ -113,9 +107,15 @@ QString Lux::getHwUAVO()
 }
 
 //! Determine if this board supports configuring the receiver
-bool Lux::isInputConfigurationSupported()
+bool Lux::isInputConfigurationSupported(enum InputType type = INPUT_TYPE_ANY)
 {
-    return true;
+    switch (type) {
+    case INPUT_TYPE_PWM:
+    case INPUT_TYPE_HOTTSUMH:
+        return false;
+    default:
+        return true;
+    }
 }
 
 /**

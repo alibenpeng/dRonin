@@ -34,7 +34,7 @@
 #include "configtaskwidget.h"
 #include <QWidget>
 #include <QLineEdit>
-#include "uavsettingsimportexport/uavsettingsimportexportfactory.h"
+#include "uavsettingsimportexport/uavsettingsimportexportmanager.h"
 #include <coreplugin/connectionmanager.h>
 #include <coreplugin/icore.h>
 
@@ -51,7 +51,7 @@ ConfigTaskWidget::ConfigTaskWidget(QWidget *parent) : QWidget(parent),currentBoa
     connect(telMngr, SIGNAL(disconnected()), this, SLOT(onAutopilotDisconnect()),Qt::UniqueConnection);
     connect(telMngr, SIGNAL(connected()), this, SIGNAL(autoPilotConnected()),Qt::UniqueConnection);
     connect(telMngr, SIGNAL(disconnected()), this, SIGNAL(autoPilotDisconnected()),Qt::UniqueConnection);
-    UAVSettingsImportExportFactory * importexportplugin =  pm->getObject<UAVSettingsImportExportFactory>();
+    UAVSettingsImportExportManager * importexportplugin =  pm->getObject<UAVSettingsImportExportManager>();
     connect(importexportplugin,SIGNAL(importAboutToBegin()),this,SLOT(invalidateObjects()));
 }
 
@@ -358,19 +358,26 @@ void ConfigTaskWidget::forceConnectedState()//dynamic widgets don't recieve the 
 void ConfigTaskWidget::onAutopilotConnect()
 {
     if (utilMngr)
-        currentBoard = utilMngr->getBoardModel();//TODO REMEMBER TO ADD THIS TO FORCE CONNECTED FUNC ON CC3D_RELEASE
+        currentBoard = utilMngr->getBoardModel();
+
     invalidateObjects();
     isConnected=true;
-    foreach(objectToWidget * ow,objOfInterest)
-    {
-        loadWidgetLimits(ow->widget,ow->field,ow->index,ow->isLimited,ow->scale);
-    }
+    loadAllLimits();
     enableControls(true);
     refreshWidgetsValues();
     setDirty(false);
 
     emit autoPilotConnected();
 }
+
+void ConfigTaskWidget::loadAllLimits()
+{
+    foreach(objectToWidget * ow,objOfInterest)
+    {
+        loadWidgetLimits(ow->widget,ow->field,ow->index,ow->isLimited,ow->scale);
+    }
+}
+
 /**
  * SLOT Function used to populate the widgets with the initial values
  * Overwrite this if you need to change the default behavior

@@ -93,16 +93,13 @@ bool Sparky2::queryCapabilities(BoardCapabilities capability)
 {
     switch(capability) {
     case BOARD_CAPABILITIES_GYROS:
-        return true;
     case BOARD_CAPABILITIES_ACCELS:
-        return true;
     case BOARD_CAPABILITIES_MAGS:
-        return true;
     case BOARD_CAPABILITIES_BAROS:
-        return true;
     case BOARD_CAPABILITIES_RADIO:
+    case BOARD_CAPABILITIES_UPGRADEABLE:
         return true;
-    case BOARD_CAPABILITIES_OSD:
+    default:
         return false;
     }
     return false;
@@ -143,9 +140,16 @@ HwSparky2 * Sparky2::getSettings()
 }
 
 //! Determine if this board supports configuring the receiver
-bool Sparky2::isInputConfigurationSupported()
+bool Sparky2::isInputConfigurationSupported(enum InputType type = INPUT_TYPE_ANY)
 {
-    return true;
+    switch (type) {
+    case INPUT_TYPE_PWM:
+    case INPUT_TYPE_HOTTSUMD:
+    case INPUT_TYPE_HOTTSUMH:
+        return false;
+    default:
+        return true;
+    }
 }
 
 /**

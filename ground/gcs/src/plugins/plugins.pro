@@ -70,6 +70,7 @@ SUBDIRS += plugin_opmap
 plugin_scope.subdir = scope
 plugin_scope.depends = plugin_coreplugin
 plugin_scope.depends += plugin_uavobjects
+plugin_scope.depends += plugin_uavobjectutil
 plugin_scope.depends += plugin_uavtalk
 SUBDIRS += plugin_scope
 
@@ -103,6 +104,7 @@ plugin_uploader.depends += plugin_uavobjects
 plugin_uploader.depends += plugin_uavtalk
 plugin_uploader.depends += plugin_rawhid
 plugin_uploader.depends += plugin_uavobjectutil
+plugin_uploader.depends += plugin_uavsettingsimportexport
 SUBDIRS += plugin_uploader
 
 # Dial gadget
@@ -183,6 +185,7 @@ SUBDIRS += plugin_ipconnection
 plugin_hitl.subdir = hitl
 plugin_hitl.depends = plugin_coreplugin
 plugin_hitl.depends += plugin_uavobjects
+plugin_hitl.depends += plugin_uavobjectutil
 plugin_hitl.depends += plugin_uavtalk
 SUBDIRS += plugin_hitl
 }
@@ -356,3 +359,11 @@ plugin_boards_brotronics.depends = plugin_uavobjects
 plugin_boards_brotronics.depends += plugin_uavobjectutil
 plugin_boards_brotronics.depends += plugin_uavobjectwidgetutils
 SUBDIRS += plugin_boards_brotronics
+
+# dRonin
+plugin_boards_dronin.subdir = boards_dronin
+plugin_boards_dronin.depends = plugin_coreplugin
+plugin_boards_dronin.depends = plugin_uavobjects
+plugin_boards_dronin.depends += plugin_uavobjectutil
+plugin_boards_dronin.depends += plugin_uavobjectwidgetutils
+SUBDIRS += plugin_boards_dronin

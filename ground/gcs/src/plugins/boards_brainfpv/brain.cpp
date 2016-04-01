@@ -78,17 +78,14 @@ bool Brain::queryCapabilities(BoardCapabilities capability)
 {
     switch(capability) {
     case BOARD_CAPABILITIES_GYROS:
-        return true;
     case BOARD_CAPABILITIES_ACCELS:
-        return true;
     case BOARD_CAPABILITIES_MAGS:
-        return true;
     case BOARD_CAPABILITIES_BAROS:
-        return true;
-    case BOARD_CAPABILITIES_RADIO:
-        return false;
     case BOARD_CAPABILITIES_OSD:
+    case BOARD_CAPABILITIES_UPGRADEABLE:
         return true;
+    default:
+        return false;
     }
     return false;
 }
@@ -116,8 +113,9 @@ QString Brain::getHwUAVO()
 }
 
 //! Determine if this board supports configuring the receiver
-bool Brain::isInputConfigurationSupported()
+bool Brain::isInputConfigurationSupported(enum InputType type = INPUT_TYPE_ANY)
 {
+    Q_UNUSED(type);
     return true;
 }
 

@@ -71,16 +71,9 @@ bool Naze::queryCapabilities(BoardCapabilities capability)
 {
     switch(capability) {
     case BOARD_CAPABILITIES_GYROS:
-        return true;
     case BOARD_CAPABILITIES_ACCELS:
         return true;
-    case BOARD_CAPABILITIES_MAGS:
-        return false;
-    case BOARD_CAPABILITIES_BAROS:
-        return false;
-    case BOARD_CAPABILITIES_RADIO:
-        return false;
-    case BOARD_CAPABILITIES_OSD:
+    default:
         return false;
     }
     return false;
@@ -134,9 +127,10 @@ int Naze::queryMaxGyroRate()
 }
 
 //! Determine if this board supports configuring the receiver
-bool Naze::isInputConfigurationSupported()
+bool Naze::isInputConfigurationSupported(enum InputType type = INPUT_TYPE_ANY)
 {
     // doesn't work for now since the board can't reconnect  automatically after reboot
+    Q_UNUSED(type);
     return false;
 }
 

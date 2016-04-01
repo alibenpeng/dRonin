@@ -43,6 +43,8 @@
 #include "uavobjectutilmanager.h"
 #include "uavtalk/telemetrymanager.h"
 #include "coreplugin/connectionmanager.h"
+#include "uavsettingsimportexport/uavsettingsimportexportmanager.h"
+#include "upgradeassistantdialog.h"
 
 using namespace tl_dfu;
 
@@ -59,16 +61,12 @@ public:
     ~UploaderGadgetWidget();
 public slots:
 signals:
-    void bootloaderDetected();
-    void rescueTimer(int);
-    void rescueFinish(bool);
-    void uploadProgress(UploaderStatus, QVariant);
     void newBoardSeen(deviceInfo board, deviceDescriptorStruct device);
+    void enteredLoader();
 private slots:
     void onAutopilotConnect();
     void onAutopilotDisconnect();
     void onAutopilotReady();
-    void onIAPPresentChanged(UAVDataObject*);
     void onIAPUpdated();
     void onLoadFirmwareButtonClick();
     void onFlashButtonClick();
@@ -96,29 +94,49 @@ private:
     void setUploaderStatus(const uploader::UploaderStatus &value);
     void CheckAutopilotReady();
     bool CheckInBootloaderState();
+    /* XXX TODO: make capitalization consistent */
     void setStatusInfo(QString str, uploader::StatusIcon ic);
-    QString getFirmwarePathForBoard(QString boardName);
-    bool FirmwareLoadFromFile(QString filename);
-    bool FirmwareLoadFromFile(QFileInfo filename);
+    QString getImagePath(QString boardName, QString imageType = QString("fw"));
+    bool FirmwareLoadFromFile(QString filename, QByteArray *contents);
     bool FirmwareCheckForUpdate(deviceDescriptorStruct device);
     void triggerPartitionDownload(int index);
     void haltOrReset(bool halting);
+    bool tradeSettingsWithCloud(QString srcRelease, bool upgrading = false,
+            QByteArray *settingsOut = NULL);
+    int isCloudReleaseAvailable(QString srcRelease);
+
+    bool saveSettings(const QByteArray &settingsDump);
+
+    bool askIfShouldContinue();
+    bool downloadSettings();
+    void stepChangeAndDelay(QEventLoop &loop, int delayMs,
+                    UpgradeAssistantDialog::UpgradeAssistantStep step);
+    void doUpgradeOperation(bool blankFC);
+    void upgradeError(QString why);
+    bool flashFirmware(QByteArray &firmwareImage);
+    bool haveSettingsPart() const;
 
     Ui_UploaderWidget *m_widget;
+
+    UpgradeAssistantDialog m_dialog;
+
     bool telemetryConnected;
-    bool iapPresent;
     bool iapUpdated;
-    UAVObjectUtilManager* utilMngr;
+
     QByteArray loadedFile;
+    QByteArray settingsDump;
+
     DFUObject dfu;
-    ExtensionSystem::PluginManager *pm;
     USBSignalFilter *usbFilterBL;
     USBSignalFilter *usbFilterUP;
-    TelemetryManager* telMngr;
+    ExtensionSystem::PluginManager *pm;
+    TelemetryManager *telMngr;
+    UAVObjectUtilManager *utilMngr;
     Core::ConnectionManager *conMngr;
     QNetworkAccessManager *netMngr;
+    UAVSettingsImportExportManager *importMngr;
 
-    FirmwareIAPObj *firmwareIap;
+    FirmwareIAPObj* firmwareIap;
     deviceInfo currentBoard;
     QString ignoredRev;
 
@@ -126,6 +144,7 @@ private:
     QByteArray tempArray;
 
     const QString exportUrl = QString("http://dronin-autotown.appspot.com/convert");
+    const QString hasRevUrl = QString("http://dronin-autotown.appspot.com/uavos/%1");
 };
 }
 #endif // UPLOADERGADGETWIDGET_H

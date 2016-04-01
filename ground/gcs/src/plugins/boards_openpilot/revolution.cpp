@@ -88,16 +88,13 @@ bool Revolution::queryCapabilities(BoardCapabilities capability)
 {
     switch(capability) {
     case BOARD_CAPABILITIES_GYROS:
-        return true;
     case BOARD_CAPABILITIES_ACCELS:
-        return true;
     case BOARD_CAPABILITIES_MAGS:
-        return true;
     case BOARD_CAPABILITIES_BAROS:
-        return true;
     case BOARD_CAPABILITIES_RADIO:
+    case BOARD_CAPABILITIES_UPGRADEABLE:
         return true;
-    case BOARD_CAPABILITIES_OSD:
+    default:
         return false;
     }
     return false;
@@ -136,8 +133,9 @@ HwRevolution * Revolution::getSettings()
     return hwRevolution;
 }
 //! Determine if this board supports configuring the receiver
-bool Revolution::isInputConfigurationSupported()
+bool Revolution::isInputConfigurationSupported(enum InputType type = INPUT_TYPE_ANY)
 {
+    Q_UNUSED(type);
     return true;
 }
 
@@ -168,13 +166,13 @@ bool Revolution::setInputType(enum InputType type)
         settings.MainPort = HwRevolution::MAINPORT_SBUS;
         break;
     case INPUT_TYPE_DSM:
-        settings.MainPort = HwRevolution::MAINPORT_DSM;
+        settings.FlexiPort = HwRevolution::FLEXIPORT_DSM;
         break;
     case INPUT_TYPE_HOTTSUMD:
-        settings.MainPort = HwRevolution::MAINPORT_HOTTSUMD;
+        settings.FlexiPort = HwRevolution::FLEXIPORT_HOTTSUMD;
         break;
     case INPUT_TYPE_HOTTSUMH:
-        settings.MainPort = HwRevolution::MAINPORT_HOTTSUMH;
+        settings.FlexiPort = HwRevolution::FLEXIPORT_HOTTSUMH;
         break;
     default:
         return false;

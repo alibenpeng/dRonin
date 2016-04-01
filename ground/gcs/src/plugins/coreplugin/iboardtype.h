@@ -2,6 +2,7 @@
  ******************************************************************************
  *
  * @file       iboardtype.h
+ * @author     dRonin, http://dRonin.org/, Copyright (C) 2016
  * @author     Tau Labs, http://taulabs.org, Copyright (C) 2012-2014
  *             Parts by Nokia Corporation (qt-info@nokia.com) Copyright (C) 2009.
  * @addtogroup GCSPlugins GCS Plugins
@@ -24,6 +25,10 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * Additional note on redistribution: The copyright and license notices above
+ * must be maintained in each individual source file that is a derivative work
+ * of this source file; otherwise redistribution is prohibited.
  */
 #ifndef IBOARDTYPE_H
 #define IBOARDTYPE_H
@@ -88,7 +93,9 @@ public:
     //! Types of capabilities boards can support
     enum BoardCapabilities {BOARD_CAPABILITIES_GYROS, BOARD_CAPABILITIES_ACCELS,
                             BOARD_CAPABILITIES_MAGS, BOARD_CAPABILITIES_BAROS,
-                            BOARD_CAPABILITIES_RADIO, BOARD_CAPABILITIES_OSD};
+                            BOARD_CAPABILITIES_RADIO, BOARD_CAPABILITIES_OSD,
+                            BOARD_CAPABILITIES_UPGRADEABLE,
+                            BOARD_DISABILITY_REQUIRESUPGRADER };
     /**
      * @brief Query capabilities of the board.
      * @return true if board supports the capability that is requested (from BoardCapabilities)
@@ -166,11 +173,12 @@ public:
         INPUT_TYPE_SBUSNONINVERTED,
         INPUT_TYPE_HOTTSUMD,
         INPUT_TYPE_HOTTSUMH,
-        INPUT_TYPE_UNKNOWN
+        INPUT_TYPE_UNKNOWN,
+        INPUT_TYPE_ANY
     };
 
     //! Determine if this board supports configuring the receiver
-    virtual bool isInputConfigurationSupported() { return false; }
+    virtual bool isInputConfigurationSupported(enum InputType type = INPUT_TYPE_ANY) { Q_UNUSED(type); return false; }
 
     /**
      * @brief Configure the board to use an receiver input type on a port number

@@ -108,15 +108,41 @@ static const struct pios_mpu60x0_cfg pios_mpu6050_cfg = {
 #include "pios_frsky_rssi_priv.h"
 #endif /* PIOS_INCLUDE_FRSKY_RSSI */
 
+#if defined(PIOS_INCLUDE_HMC5883)
+#include "pios_hmc5883_priv.h"
+
+static const struct pios_hmc5883_cfg pios_hmc5883_external_cfg = {
+	.M_ODR = PIOS_HMC5883_ODR_75,
+	.Meas_Conf = PIOS_HMC5883_MEASCONF_NORMAL,
+	.Gain = PIOS_HMC5883_GAIN_1_9,
+	.Mode = PIOS_HMC5883_MODE_SINGLE,
+	.Default_Orientation = PIOS_HMC5883_TOP_0DEG,
+};
+#endif /* PIOS_INCLUDE_HMC5883 */
+
+#if defined(PIOS_INCLUDE_HMC5983_I2C)
+#include "pios_hmc5983.h"
+
+static const struct pios_hmc5983_cfg pios_hmc5983_external_cfg = {
+	.M_ODR = PIOS_HMC5983_ODR_75,
+	.Meas_Conf = PIOS_HMC5983_MEASCONF_NORMAL,
+	.Gain = PIOS_HMC5983_GAIN_1_9,
+	.Mode = PIOS_HMC5983_MODE_SINGLE,
+	.Orientation = PIOS_HMC5983_TOP_0DEG,
+};
+#endif /* PIOS_INCLUDE_HMC5983 */
+
 /**
  * PIOS_Board_Init()
  * initializes all the core subsystems on this specific hardware
  * called from System/openpilot.c
  */
+bool external_mag_fail;
 
 #include <pios_board_info.h>
 
 void PIOS_Board_Init(void) {
+	bool ext_mag_init_ok = false;
 
 	/* Delay system */
 	PIOS_DELAY_Init();
@@ -276,8 +302,8 @@ void PIOS_Board_Init(void) {
 	PIOS_HAL_ConfigurePort(hw_uart1,             // port type protocol
 			&pios_usart1_cfg,                    // usart_port_cfg
 			&pios_usart_com_driver,              // com_driver
-			NULL,                                // i2c_id
-			NULL,                                // i2c_cfg
+			&pios_i2c_usart1_adapter_id,         // i2c_id
+			&pios_i2c_usart1_adapter_cfg,        // i2c_cfg
 			NULL,                                // ppm_cfg
 			NULL,                                // pwm_cfg
 			PIOS_LED_ALARM,                      // led_id
@@ -292,8 +318,8 @@ void PIOS_Board_Init(void) {
 	PIOS_HAL_ConfigurePort(hw_uart3,             // port type protocol
 			&pios_usart3_cfg,                    // usart_port_cfg
 			&pios_usart_com_driver,              // com_driver
-			NULL,                                // i2c_id
-			NULL,                                // i2c_cfg
+			&pios_i2c_usart3_adapter_id,         // i2c_id
+			&pios_i2c_usart3_adapter_cfg,        // i2c_cfg
 			NULL,                                // ppm_cfg
 			NULL,                                // pwm_cfg
 			PIOS_LED_ALARM,                      // led_id
@@ -395,6 +421,78 @@ void PIOS_Board_Init(void) {
 
 #if defined(PIOS_INCLUDE_I2C)
 
+	/* Magnetometer selection */
+	uint8_t Magnetometer;
+	HwMyFirstFCMagnetometerGet(&Magnetometer);
+	switch (Magnetometer) {
+		case HWMYFIRSTFC_MAGNETOMETER_DISABLED:
+			ext_mag_init_ok = true;
+			break;
+		case HWMYFIRSTFC_MAGNETOMETER_FLXPORTHMC5883:
+			if (hw_uart3 == HWMYFIRSTFC_UART3_I2C){
+#if defined(PIOS_INCLUDE_HMC5883)
+				if (PIOS_HMC5883_Init(pios_i2c_usart3_adapter_id, &pios_hmc5883_external_cfg) == 0) {
+					if (PIOS_HMC5883_Test() == 0) {
+						// sensor configuration was successful: external mag is attached and powered
+
+						// setup sensor orientation
+						uint8_t ExtMagOrientation;
+						HwMyFirstFCExtMagOrientationGet(&ExtMagOrientation);
+
+						enum pios_hmc5883_orientation hmc5883_orientation = \
+							(ExtMagOrientation == HWMYFIRSTFC_EXTMAGORIENTATION_TOP0DEGCW) ? PIOS_HMC5883_TOP_0DEG : \
+							(ExtMagOrientation == HWMYFIRSTFC_EXTMAGORIENTATION_TOP90DEGCW) ? PIOS_HMC5883_TOP_90DEG : \
+							(ExtMagOrientation == HWMYFIRSTFC_EXTMAGORIENTATION_TOP180DEGCW) ? PIOS_HMC5883_TOP_180DEG : \
+							(ExtMagOrientation == HWMYFIRSTFC_EXTMAGORIENTATION_TOP270DEGCW) ? PIOS_HMC5883_TOP_270DEG : \
+							(ExtMagOrientation == HWMYFIRSTFC_EXTMAGORIENTATION_BOTTOM0DEGCW) ? PIOS_HMC5883_BOTTOM_0DEG : \
+							(ExtMagOrientation == HWMYFIRSTFC_EXTMAGORIENTATION_BOTTOM90DEGCW) ? PIOS_HMC5883_BOTTOM_90DEG : \
+							(ExtMagOrientation == HWMYFIRSTFC_EXTMAGORIENTATION_BOTTOM180DEGCW) ? PIOS_HMC5883_BOTTOM_180DEG : \
+							(ExtMagOrientation == HWMYFIRSTFC_EXTMAGORIENTATION_BOTTOM270DEGCW) ? PIOS_HMC5883_BOTTOM_270DEG : \
+							pios_hmc5883_external_cfg.Default_Orientation;
+						PIOS_HMC5883_SetOrientation(hmc5883_orientation);
+						ext_mag_init_ok = true;
+					}
+				}
+			}
+#endif /* PIOS_INCLUDE_HMC5883 */
+			break;
+		case HWMYFIRSTFC_MAGNETOMETER_FLXPORTHMC5983:
+			if (hw_uart3 == HWMYFIRSTFC_UART3_I2C){
+#if defined(PIOS_INCLUDE_HMC5983_I2C)
+				if (PIOS_HMC5983_Init(pios_i2c_usart3_adapter_id, 0, &pios_hmc5983_external_cfg) == 0) {
+
+					if (PIOS_HMC5983_Test() == 0) {
+						// sensor configuration was successful: external mag is attached and powered
+
+						// setup sensor orientation
+						uint8_t ExtMagOrientation;
+						HwMyFirstFCExtMagOrientationGet(&ExtMagOrientation);
+
+						enum pios_hmc5983_orientation hmc5983_orientation = \
+							(ExtMagOrientation == HWMYFIRSTFC_EXTMAGORIENTATION_TOP0DEGCW) ? PIOS_HMC5983_TOP_0DEG : \
+							(ExtMagOrientation == HWMYFIRSTFC_EXTMAGORIENTATION_TOP90DEGCW) ? PIOS_HMC5983_TOP_90DEG : \
+							(ExtMagOrientation == HWMYFIRSTFC_EXTMAGORIENTATION_TOP180DEGCW) ? PIOS_HMC5983_TOP_180DEG : \
+							(ExtMagOrientation == HWMYFIRSTFC_EXTMAGORIENTATION_TOP270DEGCW) ? PIOS_HMC5983_TOP_270DEG : \
+							(ExtMagOrientation == HWMYFIRSTFC_EXTMAGORIENTATION_BOTTOM0DEGCW) ? PIOS_HMC5983_BOTTOM_0DEG : \
+							(ExtMagOrientation == HWMYFIRSTFC_EXTMAGORIENTATION_BOTTOM90DEGCW) ? PIOS_HMC5983_BOTTOM_90DEG : \
+							(ExtMagOrientation == HWMYFIRSTFC_EXTMAGORIENTATION_BOTTOM180DEGCW) ? PIOS_HMC5983_BOTTOM_180DEG : \
+							(ExtMagOrientation == HWMYFIRSTFC_EXTMAGORIENTATION_BOTTOM270DEGCW) ? PIOS_HMC5983_BOTTOM_270DEG : \
+							pios_hmc5983_external_cfg.Orientation;
+						PIOS_HMC5983_SetOrientation(hmc5983_orientation);
+						ext_mag_init_ok = true;
+					}
+				}
+#endif /* PIOS_INCLUDE_HMC5983_I2C */
+			}
+			break;
+	}
+
+
+	//I2C is slow, sensor init as well, reset watchdog to prevent reset here
+	PIOS_WDG_Clear();
+
+
+
 #if defined(PIOS_INCLUDE_MPU6050)
 	{
 		if (PIOS_MPU6050_Init(pios_i2c_internal_adapter_id, PIOS_MPU6050_I2C_ADD_A0_LOW, &pios_mpu6050_cfg) != 0)
@@ -476,6 +574,9 @@ void PIOS_Board_Init(void) {
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 	GPIO_ResetBits(GPIOA, GPIO_Pin_9);
+
+	// set variable so the Sensors task sets an alarm
+	external_mag_fail = !ext_mag_init_ok;
 
 	/* Make sure we have at least one telemetry link configured or else fail initialization */
 	PIOS_Assert(pios_com_telem_serial_id || pios_com_telem_usb_id);
